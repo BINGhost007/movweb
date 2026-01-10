@@ -1,0 +1,33 @@
+{
+  "name": "movweb",
+  "version": "1.0.0",
+  "description": "Full-stack movie streaming platform with premium UI/UX, user authentication, and powerful admin dashboard",
+  "private": true,
+  "scripts": {
+    "start": "node server/app.js",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
+    "build": "cd client && npm run build",
+    "test": "echo \"Run tests in client and server directories\"",
+    "setup": "cd server && npm install && cd ../client && npm install",
+    "seed": "cd database && node seeders/seed.js",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "devDependencies": {
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5"
+  },
+  "keywords": [
+    "movie",
+    "streaming",
+    "fullstack",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "Movie Streaming Platform Team",
+  "license": "MIT"
+}
