@@ -77,33 +77,67 @@ A modern, scalable movie streaming platform with premium UI/UX, user authenticat
    ```
 
 4. **Set up the database:**
+
+   Choose one of the following options to run MongoDB:
+
+   **Option 1: MongoDB installed locally**
    ```bash
-   # Make sure MongoDB is running
-   mongod
-   
-   # Seed the database with initial data
+   # Start MongoDB service
+   # On macOS: brew services start mongodb-community
+   # On Ubuntu: sudo systemctl start mongodb
+   # On Windows: MongoDB should be running as a service
+   ```
+
+   **Option 2: Use Docker Compose (recommended)**
+   ```bash
+   # Start MongoDB with Docker Compose
+   docker-compose up -d
+
+   # To view MongoDB with Mongo Express UI
+   # Open: http://localhost:8081
+   ```
+
+   **Option 3: Connect to remote MongoDB**
+   ```bash
+   # Edit .env file and update MONGODB_URI with your connection string
+   # Example: mongodb+srv://username:password@cluster.mongodb.net/movweb
+   ```
+
+   **Seed the database with initial data:**
+   ```bash
    cd database
    node seeders/seed.js
    ```
 
 ### Running the Application
 
-1. **Start the backend server:**
+You can run the application in two ways:
+
+**Option 1: Run both servers from the root directory (recommended)**
    ```bash
-   cd server
+   # Make sure MongoDB is running first, then:
    npm run dev
    ```
+   This will start both the backend (port 5000) and frontend (port 3000) concurrently.
 
-2. **Start the frontend application:**
-   ```bash
-   cd client
-   npm start
-   ```
+**Option 2: Run servers separately**
+
+1. **Start the backend server:**
+    ```bash
+    cd server
+    npm run dev
+    ```
+
+2. **Start the frontend application (in a new terminal):**
+    ```bash
+    cd client
+    npm run dev
+    ```
 
 3. **Access the application:**
-   - Frontend: `http://localhost:3000`
-   - Backend API: `http://localhost:5000/api`
-   - Admin Dashboard: `http://localhost:3000/admin`
+    - Frontend: `http://localhost:3000`
+    - Backend API: `http://localhost:5000/api`
+    - Admin Dashboard: `http://localhost:3000/admin`
 
 ### Admin Access
 
@@ -208,11 +242,84 @@ npm run build
 To run the application with Docker:
 
 ```bash
-# Build and start containers
+# Build and start containers (includes MongoDB, backend, and Mongo Express)
 docker-compose up --build
 
 # Stop containers
 docker-compose down
+
+# View logs
+docker-compose logs -f
+```
+
+When using Docker, the MongoDB URI is automatically set to `mongodb://mongo:27017/movweb` and Mongo Express is available at `http://localhost:8081`.
+
+## Troubleshooting
+
+### MongoDB Connection Error
+
+If you see `MongoDB connection error: connect ECONNREFUSED`, follow these steps:
+
+1. **Check if MongoDB is running:**
+   ```bash
+   # For local MongoDB installation
+   mongod --version
+   # Start MongoDB service
+   # macOS: brew services start mongodb-community
+   # Ubuntu: sudo systemctl start mongodb
+   # Windows: Check Services app
+   ```
+
+2. **Use Docker Compose (easiest):**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Connect to MongoDB Atlas (cloud):**
+   - Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+   - Get your connection string
+   - Update `.env` file:
+     ```
+     MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/movweb
+     ```
+
+4. **Check if port 27017 is available:**
+   ```bash
+   # On macOS/Linux
+   lsof -i :27017
+   # Kill process using the port
+   kill -9 <PID>
+   ```
+
+### Port Already in Use
+
+If you see `EADDRINUSE` error for ports 3000 or 5000:
+
+```bash
+# Find process using the port (macOS/Linux)
+lsof -i :3000
+lsof -i :5000
+
+# Kill the process
+kill -9 <PID>
+
+# On Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+```
+
+### Dependencies Issues
+
+If you encounter module not found errors:
+
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
+
+# For both client and server
+cd server && rm -rf node_modules package-lock.json && npm install
+cd ../client && rm -rf node_modules package-lock.json && npm install
 ```
 
 ## Deployment
