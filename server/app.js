@@ -28,7 +28,11 @@ const connectDB = async () => {
     await mongoose.connect(config.mongodbUri);
     console.log('MongoDB connected successfully');
   } catch (error) {
-    console.error('MongoDB connection error:', error);
+    console.error('MongoDB connection error:', error.message);
+    console.error('\nMake sure MongoDB is running:');
+    console.error('Option 1: Start MongoDB locally: mongod');
+    console.error('Option 2: Use Docker Compose: docker-compose up -d');
+    console.error('Option 3: Update MONGODB_URI in .env file to connect to remote MongoDB\n');
     process.exit(1);
   }
 };
