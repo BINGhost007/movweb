@@ -1,101 +1,82 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const { MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
-const path = require('path');
-
-// Add server node_modules to require path
-const serverNodeModules = path.join(__dirname, '../../server/node_modules');
-require('module').globalPaths.push(serverNodeModules);
-
-// Set up paths for models from server directory
-const User = require(path.join(__dirname, '../../server/models/User'));
-const Category = require(path.join(__dirname, '../../server/models/Category'));
-const Movie = require(path.join(__dirname, '../../server/models/Movie'));
 
 const seedDatabase = async () => {
+  let client;
+  
   try {
-    console.log('Attempting to connect to MongoDB...');
+    console.log('Connecting to MongoDB using native driver...');
     
-    // Connect to database
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/movweb', {
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/movweb';
+    client = new MongoClient(uri, { 
       serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 10000
+      socketTimeoutMS: 10000 
     });
     
-    console.log('Connected to MongoDB for seeding');
-
-    // Force close any existing connections and reconnect
-    await mongoose.disconnect();
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await client.connect();
+    console.log('Connected to MongoDB successfully');
     
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/movweb', {
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 10000
-    });
+    const db = client.db('movweb');
     
-    console.log('Reconnected to MongoDB');
-
-    // Simple approach - just insert data
-    console.log('Starting to seed database...');
-
+    // Clear existing data
+    console.log('Clearing existing data...');
+    await db.collection('users').deleteMany({});
+    await db.collection('categories').deleteMany({});
+    await db.collection('movies').deleteMany({});
+    
     // Create admin user
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
-
-    let adminUser;
-    try {
-      adminUser = await User.create({
-        name: 'Admin User',
-        email: process.env.ADMIN_EMAIL || 'admin@example.com',
-        password: hashedPassword,
-        role: 'admin',
-        isActive: true
-      });
-      console.log('Admin user created:', adminUser.email);
-    } catch (error) {
-      console.log('Admin user might already exist:', error.message);
-      adminUser = await User.findOne({ email: process.env.ADMIN_EMAIL || 'admin@example.com' });
-    }
-
+    
+    const adminUser = {
+      name: 'Admin User',
+      email: process.env.ADMIN_EMAIL || 'admin@example.com',
+      password: hashedPassword,
+      role: 'admin',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      profileImage: '/uploads/default-profile.jpg'
+    };
+    
+    const adminResult = await db.collection('users').insertOne(adminUser);
+    console.log('Admin user created:', adminUser.email);
+    
     // Create regular user
     const userPassword = await bcrypt.hash('user123', 10);
-    let regularUser;
-    try {
-      regularUser = await User.create({
-        name: 'Regular User',
-        email: 'user@example.com',
-        password: userPassword,
-        role: 'user',
-        isActive: true
-      });
-      console.log('Regular user created:', regularUser.email);
-    } catch (error) {
-      console.log('Regular user might already exist:', error.message);
-      regularUser = await User.findOne({ email: 'user@example.com' });
-    }
-
+    const regularUser = {
+      name: 'Regular User',
+      email: 'user@example.com',
+      password: userPassword,
+      role: 'user',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      profileImage: '/uploads/default-profile.jpg'
+    };
+    
+    await db.collection('users').insertOne(regularUser);
+    console.log('Regular user created:', regularUser.email);
+    
     // Create categories
     const categories = [
-      { name: 'Action', description: 'Action movies' },
-      { name: 'Comedy', description: 'Comedy movies' },
-      { name: 'Drama', description: 'Drama movies' },
-      { name: 'Sci-Fi', description: 'Science Fiction movies' },
-      { name: 'Horror', description: 'Horror movies' },
-      { name: 'Romance', description: 'Romance movies' },
-      { name: 'Thriller', description: 'Thriller movies' },
-      { name: 'Documentary', description: 'Documentary movies' }
+      { name: 'Action', description: 'Action movies', createdAt: new Date() },
+      { name: 'Comedy', description: 'Comedy movies', createdAt: new Date() },
+      { name: 'Drama', description: 'Drama movies', createdAt: new Date() },
+      { name: 'Sci-Fi', description: 'Science Fiction movies', createdAt: new Date() },
+      { name: 'Horror', description: 'Horror movies', createdAt: new Date() },
+      { name: 'Romance', description: 'Romance movies', createdAt: new Date() },
+      { name: 'Thriller', description: 'Thriller movies', createdAt: new Date() },
+      { name: 'Documentary', description: 'Documentary movies', createdAt: new Date() }
     ];
-
-    let createdCategories = [];
-    try {
-      createdCategories = await Category.insertMany(categories);
-      console.log('Categories created:', createdCategories.length);
-    } catch (error) {
-      console.log('Categories might already exist:', error.message);
-      createdCategories = await Category.find({});
-      console.log('Found existing categories:', createdCategories.length);
-    }
-
+    
+    const categoryResults = await db.collection('categories').insertMany(categories);
+    console.log('Categories created:', categoryResults.insertedCount);
+    
+    // Get category IDs for movies
+    const categoryIds = Object.values(categoryResults.insertedIds);
+    
     // Create sample movies
     const movies = [
       {
@@ -109,9 +90,12 @@ const seedDatabase = async () => {
         streamingUrl: 'https://example.com/stream/dark-knight.mp4',
         downloadUrl: 'https://example.com/download/dark-knight.mp4',
         isPopular: true,
-        categories: [createdCategories[0]._id], // Action
+        categories: [categoryIds[0]], // Action
         tags: ['batman', 'superhero', 'crime'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'Inception',
@@ -124,9 +108,12 @@ const seedDatabase = async () => {
         streamingUrl: 'https://example.com/stream/inception.mp4',
         downloadUrl: 'https://example.com/download/inception.mp4',
         isPopular: true,
-        categories: [createdCategories[3]._id], // Sci-Fi
+        categories: [categoryIds[3]], // Sci-Fi
         tags: ['sci-fi', 'mind-bending', 'action'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'The Shawshank Redemption',
@@ -138,9 +125,12 @@ const seedDatabase = async () => {
         posterUrl: 'https://image.tmdb.org/t/p/w500/9O7gLzmreU0nGkIB6K3BsJbzvNv.jpg',
         streamingUrl: 'https://example.com/stream/shawshank.mp4',
         downloadUrl: 'https://example.com/download/shawshank.mp4',
-        categories: [createdCategories[2]._id], // Drama
+        categories: [categoryIds[2]], // Drama
         tags: ['prison', 'friendship', 'hope'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'Pulp Fiction',
@@ -152,9 +142,12 @@ const seedDatabase = async () => {
         posterUrl: 'https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JU9kxab.jpg',
         streamingUrl: 'https://example.com/stream/pulp-fiction.mp4',
         downloadUrl: 'https://example.com/download/pulp-fiction.mp4',
-        categories: [createdCategories[6]._id], // Thriller
+        categories: [categoryIds[6]], // Thriller
         tags: ['crime', 'tarantino', 'violence'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'The Godfather',
@@ -167,9 +160,12 @@ const seedDatabase = async () => {
         streamingUrl: 'https://example.com/stream/godfather.mp4',
         downloadUrl: 'https://example.com/download/godfather.mp4',
         isPopular: true,
-        categories: [createdCategories[2]._id], // Drama
+        categories: [categoryIds[2]], // Drama
         tags: ['mafia', 'crime', 'classic'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'Forrest Gump',
@@ -182,9 +178,12 @@ const seedDatabase = async () => {
         streamingUrl: 'https://example.com/stream/forrest-gump.mp4',
         downloadUrl: 'https://example.com/download/forrest-gump.mp4',
         isPopular: true,
-        categories: [createdCategories[2]._id], // Drama
+        categories: [categoryIds[2]], // Drama
         tags: ['friendship', 'comedy', 'drama'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'The Matrix',
@@ -197,9 +196,12 @@ const seedDatabase = async () => {
         streamingUrl: 'https://example.com/stream/matrix.mp4',
         downloadUrl: 'https://example.com/download/matrix.mp4',
         isPopular: true,
-        categories: [createdCategories[3]._id], // Sci-Fi
+        categories: [categoryIds[3]], // Sci-Fi
         tags: ['action', 'cyberpunk', 'philosophy'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'The Lord of the Rings: The Fellowship of the Ring',
@@ -212,9 +214,12 @@ const seedDatabase = async () => {
         streamingUrl: 'https://example.com/stream/lotr-fellowship.mp4',
         downloadUrl: 'https://example.com/download/lotr-fellowship.mp4',
         isPopular: true,
-        categories: [createdCategories[3]._id], // Sci-Fi
+        categories: [categoryIds[3]], // Sci-Fi
         tags: ['fantasy', 'adventure', 'epic'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'Titanic',
@@ -226,9 +231,12 @@ const seedDatabase = async () => {
         posterUrl: 'https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg',
         streamingUrl: 'https://example.com/stream/titanic.mp4',
         downloadUrl: 'https://example.com/download/titanic.mp4',
-        categories: [createdCategories[5]._id], // Romance
+        categories: [categoryIds[5]], // Romance
         tags: ['romance', 'disaster', 'classic'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'The Silence of the Lambs',
@@ -240,9 +248,12 @@ const seedDatabase = async () => {
         posterUrl: 'https://image.tmdb.org/t/p/w500/uS9m8OBk1A8eM9I042bx8XXpqAq.jpg',
         streamingUrl: 'https://example.com/stream/silence-lambs.mp4',
         downloadUrl: 'https://example.com/download/silence-lambs.mp4',
-        categories: [createdCategories[4]._id], // Horror
+        categories: [categoryIds[4]], // Horror
         tags: ['psychological', 'thriller', 'crime'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'Jurassic Park',
@@ -255,9 +266,12 @@ const seedDatabase = async () => {
         streamingUrl: 'https://example.com/stream/jurassic-park.mp4',
         downloadUrl: 'https://example.com/download/jurassic-park.mp4',
         isPopular: true,
-        categories: [createdCategories[3]._id], // Sci-Fi
+        categories: [categoryIds[3]], // Sci-Fi
         tags: ['dinosaurs', 'adventure', 'family'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'The Avengers',
@@ -270,9 +284,12 @@ const seedDatabase = async () => {
         streamingUrl: 'https://example.com/stream/avengers.mp4',
         downloadUrl: 'https://example.com/download/avengers.mp4',
         isPopular: true,
-        categories: [createdCategories[0]._id], // Action
+        categories: [categoryIds[0]], // Action
         tags: ['superhero', 'action', 'marvel'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'Casablanca',
@@ -284,9 +301,12 @@ const seedDatabase = async () => {
         posterUrl: 'https://image.tmdb.org/t/p/w500/lwH0W8Yp5P8s6Q6x3fX2L8G6G4P.jpg',
         streamingUrl: 'https://example.com/stream/casablanca.mp4',
         downloadUrl: 'https://example.com/download/casablanca.mp4',
-        categories: [createdCategories[5]._id], // Romance
+        categories: [categoryIds[5]], // Romance
         tags: ['classic', 'romance', 'war'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       },
       {
         title: 'Psycho',
@@ -298,37 +318,37 @@ const seedDatabase = async () => {
         posterUrl: 'https://image.tmdb.org/t/p/w500/7Jm6xhfz8s7v6N9L0s9QK3bK7vV.jpg',
         streamingUrl: 'https://example.com/stream/psycho.mp4',
         downloadUrl: 'https://example.com/download/psycho.mp4',
-        categories: [createdCategories[4]._id], // Horror
+        categories: [categoryIds[4]], // Horror
         tags: ['horror', 'classic', 'suspense'],
-        createdBy: adminUser._id
+        createdBy: adminResult.insertedId,
+        createdAt: new Date(),
+        views: 0,
+        downloads: 0
       }
     ];
-
-    let createdMovies = [];
-    try {
-      // Make sure we have categories and admin user
-      if (!adminUser || !createdCategories.length) {
-        throw new Error('Missing required data: adminUser or categories');
-      }
-      
-      createdMovies = await Movie.insertMany(movies);
-      console.log('Movies created:', createdMovies.length);
-    } catch (error) {
-      console.log('Movies might already exist:', error.message);
-      createdMovies = await Movie.find({}).populate('categories');
-      console.log('Found existing movies:', createdMovies.length);
-    }
-
+    
+    const movieResults = await db.collection('movies').insertMany(movies);
+    console.log('Movies created:', movieResults.insertedCount);
+    
+    // Create indexes for better performance
+    await db.collection('movies').createIndex({ title: 'text' });
+    await db.collection('movies').createIndex({ isPopular: 1 });
+    await db.collection('movies').createIndex({ categories: 1 });
+    await db.collection('users').createIndex({ email: 1 }, { unique: true });
+    
     console.log('Database seeding completed successfully!');
     console.log(`Final counts:`);
-    console.log(`- Users: ${await User.countDocuments()}`);
-    console.log(`- Categories: ${await Category.countDocuments()}`);
-    console.log(`- Movies: ${await Movie.countDocuments()}`);
+    console.log(`- Users: ${await db.collection('users').countDocuments()}`);
+    console.log(`- Categories: ${await db.collection('categories').countDocuments()}`);
+    console.log(`- Movies: ${await db.collection('movies').countDocuments()}`);
     
-    process.exit(0);
   } catch (error) {
     console.error('Error seeding database:', error);
     process.exit(1);
+  } finally {
+    if (client) {
+      await client.close();
+    }
   }
 };
 
