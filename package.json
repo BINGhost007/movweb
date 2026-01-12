@@ -9,7 +9,7 @@
     "build": "cd client && npm run build",
     "test": "echo \"Run tests in client and server directories\"",
     "setup": "cd server && npm install && cd ../client && npm install",
-    "seed": "cd database && node seeders/seed.js",
+    "seed": "cd database && node seeders/simple-seed.js",
     "prepare": "husky install"
   },
   "dependencies": {
