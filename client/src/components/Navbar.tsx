@@ -22,11 +22,11 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-gray-800 border-b border-gray-700">
+    <nav className="bg-white border-b border-slate-200 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold text-white">
+            <Link to="/" className="text-xl font-bold text-slate-900">
               🎬 MovieStream
             </Link>
           </div>
@@ -36,7 +36,7 @@ const Navbar = () => {
               <Link 
                 key={link.path} 
                 to={link.path} 
-                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="text-slate-700 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 {link.name}
               </Link>
@@ -44,19 +44,19 @@ const Navbar = () => {
             
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link to="/profile" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                <Link to="/profile" className="text-slate-700 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">
                   Profile
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-slate-700 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Logout
                 </button>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link to="/login" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                <Link to="/login" className="text-slate-700 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">
                   Login
                 </Link>
                 <Link to="/register" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
@@ -70,7 +70,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-300 hover:text-white focus:outline-none"
+              className="text-slate-700 hover:text-slate-900 focus:outline-none"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {isMobileMenuOpen ? (
@@ -86,14 +86,14 @@ const Navbar = () => {
       
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-gray-900 border-t border-gray-700">
+        <div className="md:hidden bg-white border-t border-slate-200">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navLinks.map((link) => (
               <Link 
                 key={link.path} 
                 to={link.path} 
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                className="block text-slate-700 hover:text-slate-900 px-3 py-2 rounded-md text-base font-medium"
               >
                 {link.name}
               </Link>
@@ -104,7 +104,7 @@ const Navbar = () => {
                 <Link 
                   to="/profile" 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                  className="block text-slate-700 hover:text-slate-900 px-3 py-2 rounded-md text-base font-medium"
                 >
                   Profile
                 </Link>
@@ -113,7 +113,7 @@ const Navbar = () => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="block w-full text-left text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                  className="block w-full text-left text-slate-700 hover:text-slate-900 px-3 py-2 rounded-md text-base font-medium"
                 >
                   Logout
                 </button>
@@ -123,7 +123,7 @@ const Navbar = () => {
                 <Link 
                   to="/login" 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                  className="block text-slate-700 hover:text-slate-900 px-3 py-2 rounded-md text-base font-medium"
                 >
                   Login
                 </Link>

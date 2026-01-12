@@ -18,14 +18,24 @@ const MOCK_MOVIES: Movie[] = [
   { id: '9', title: 'Interstellar', year: 2014, rating: 8.6, quality: '4K' },
   { id: '10', title: 'Spirited Away', year: 2001, rating: 8.6, quality: 'HD' },
   { id: '11', title: 'Parasite', year: 2019, rating: 8.5, quality: '4K' },
-  { id: '12', title: 'The Prestige', year: 2006, rating: 8.5, quality: 'HD' }
+  { id: '12', title: 'The Prestige', year: 2006, rating: 8.5, quality: 'HD' },
+  { id: '13', title: 'Fight Club', year: 1999, rating: 8.8, quality: 'HD' },
+  { id: '14', title: 'Gladiator', year: 2000, rating: 8.5, quality: 'HD' },
+  { id: '15', title: 'The Lord of the Rings: The Fellowship of the Ring', year: 2001, rating: 8.9, quality: '4K' },
+  { id: '16', title: 'The Silence of the Lambs', year: 1991, rating: 8.6, quality: 'HD' },
+  { id: '17', title: 'Saving Private Ryan', year: 1998, rating: 8.6, quality: 'HD' },
+  { id: '18', title: 'The Green Mile', year: 1999, rating: 8.6, quality: 'HD' },
+  { id: '19', title: 'Schindler\'s List', year: 1993, rating: 9.0, quality: 'HD' },
+  { id: '20', title: 'Se7en', year: 1995, rating: 8.6, quality: 'HD' }
 ];
 
 const HomePage = () => {
   return (
-    <div className="bg-slate-50 text-slate-900 rounded-lg border border-slate-200 p-6 md:p-8">
+    <div className="bg-white rounded-lg border border-slate-200 p-6 md:p-8 shadow-sm">
       <div className="flex flex-col gap-2 mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Movies</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+          Movies
+        </h1>
         <p className="text-slate-600">
           Showing {MOCK_MOVIES.length} sample movies (mock data). No API calls.
         </p>
@@ -35,11 +45,11 @@ const HomePage = () => {
         {MOCK_MOVIES.map((movie) => (
           <div
             key={movie.id}
-            className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm"
+            className="bg-slate-50 rounded-lg border border-slate-200 p-4 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-start justify-between gap-3">
-              <h2 className="font-semibold leading-snug">{movie.title}</h2>
-              <span className="shrink-0 inline-flex items-center rounded-full bg-slate-900 text-white px-2 py-0.5 text-xs font-medium">
+              <h2 className="font-semibold leading-snug text-slate-900">{movie.title}</h2>
+              <span className="shrink-0 inline-flex items-center rounded-full bg-blue-600 text-white px-2 py-0.5 text-xs font-medium">
                 {movie.quality}
               </span>
             </div>
