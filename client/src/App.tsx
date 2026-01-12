@@ -27,20 +27,20 @@ function App() {
         <main className="flex-grow container mx-auto px-4 py-8">
           <Routes>
             {/* Public Routes */}
-            <Route path="" element={<HomePage />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/movie/:id" element={<MovieDetailPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             
             {/* Private Routes */}
-            <Route path="" element={<PrivateRoute />}>
+            <Route element={<PrivateRoute />}>
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/watchlist" element={<WatchlistPage />} />
             </Route>
             
             {/* Admin Routes */}
-            <Route path="" element={<AdminRoute />}>
+            <Route element={<AdminRoute />}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/movies" element={<AdminMovies />} />
               <Route path="/admin/users" element={<AdminUsers />} />
