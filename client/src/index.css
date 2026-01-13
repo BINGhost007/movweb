@@ -2,35 +2,246 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles */
-body {
-  font-family: 'Inter', sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-black text-white font-sans antialiased;
+  }
+  
+  html {
+    @apply scroll-smooth;
+  }
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+@layer components {
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-900;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
+
+  /* Custom animations */
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .slide-in-up {
+    animation: slideInUp 0.6s ease-out;
+  }
+  
+  .scale-in {
+    animation: scaleIn 0.4s ease-out;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-md transition-colors duration-200;
+  }
+  
+  .btn-ghost {
+    @apply bg-transparent hover:bg-gray-800 text-white font-semibold py-2 px-6 rounded-md border border-gray-600 hover:border-gray-500 transition-colors duration-200;
+  }
+
+  /* Card styles */
+  .movie-card {
+    @apply bg-gray-900 border border-gray-800 rounded-lg overflow-hidden transition-all duration-300 hover:border-gray-700 hover:shadow-2xl hover:-translate-y-1;
+  }
+  
+  .movie-card:hover {
+    @apply shadow-red-500/20;
+  }
+
+  /* Gradient overlays */
+  .gradient-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+  }
+  
+  .hero-gradient {
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.4) 50%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
+  /* Text shadows */
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Loading animations */
+  .loading-spinner {
+    @apply inline-block w-6 h-6 border-2 border-gray-600 border-t-red-600 rounded-full animate-spin;
+  }
+
+  /* Star ratings */
+  .star-rating {
+    @apply text-yellow-400;
+  }
+
+  /* Quality badges */
+  .quality-4k {
+    @apply bg-purple-600 text-white;
+  }
+  
+  .quality-1080p {
+    @apply bg-blue-600 text-white;
+  }
+  
+  .quality-720p {
+    @apply bg-green-600 text-white;
+  }
+
+  /* Age ratings */
+  .age-g {
+    @apply bg-green-500 text-white;
+  }
+  
+  .age-pg {
+    @apply bg-yellow-500 text-black;
+  }
+  
+  .age-pg13 {
+    @apply bg-orange-500 text-white;
+  }
+  
+  .age-r {
+    @apply bg-red-600 text-white;
+  }
+
+  /* Genre tags */
+  .genre-tag {
+    @apply bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white px-3 py-1 rounded-full text-sm transition-colors duration-200;
+  }
+
+  /* Carousel styles */
+  .carousel-container {
+    @apply overflow-x-auto scrollbar-hide;
+  }
+  
+  .carousel-track {
+    @apply flex space-x-4;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Focus styles */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-black;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-black/20 backdrop-blur-md border border-white/10;
+  }
+  
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-md border border-white/5;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+@layer utilities {
+  /* Hide scrollbar */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    background: linear-gradient(45deg, #ef4444, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Box shadows */
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  }
+  
+  .shadow-glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  
+  .shadow-glow-green {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+  }
+
+  /* Backdrop blur utilities */
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+  
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+  
+  .backdrop-blur-md {
+    backdrop-filter: blur(8px);
+  }
+  
+  .backdrop-blur-lg {
+    backdrop-filter: blur(16px);
+  }
+  
+  .backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+  }
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Animation */
+/* Keyframe animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -38,21 +249,51 @@ body {
   }
 }
 
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-/* Loading spinner */
-.loading-spinner {
-  border: 3px solid #f1f5f9;
-  border-top: 3px solid #3b82f6;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .movie-card {
+    @apply border-white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
