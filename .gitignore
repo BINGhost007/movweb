@@ -1,0 +1,23 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# SQLite database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs
+*.log
+
+# PHP
+/vendor/
+
+# Node (if added later)
+node_modules/
+
+# Build artifacts
+/dist/
