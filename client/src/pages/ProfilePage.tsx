@@ -1,135 +1,300 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { toast } from 'react-toastify';
 
 const ProfilePage = () => {
-  const { user, updateProfile } = useAuth();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState({
+    name: user?.name || 'John Doe',
+    email: user?.email || 'john.doe@example.com',
+    avatar: user?.avatar || '',
+    preferences: {
+      language: 'English',
+      notifications: true,
+      autoplay: true,
+      quality: 'Auto'
+    }
+  });
 
-  useEffect(() => {
-    if (user) {
-      setName(user.name);
-      setEmail(user.email);
-    }
-  }, [user]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!name || !email) {
-      toast.error('Name and email are required');
-      return;
-    }
-    
-    if (password && password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-    
-    if (password && password.length < 8) {
-      toast.error('Password must be at least 8 characters');
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      await updateProfile(name, email, password || undefined);
-      toast.success('Profile updated successfully');
-    } catch (error) {
-      console.error('Profile update error:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleSave = () => {
+    // In a real app, this would save to the backend
+    setIsEditing(false);
+    console.log('Profile updated:', profile);
   };
 
-  if (!user) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-500">Please login to view your profile</p>
-      </div>
-    );
-  }
+  const handleCancel = () => {
+    setIsEditing(false);
+    // Reset form data if needed
+  };
+
+  const watchingStats = {
+    totalWatched: 0,
+    favoriteGenre: 'Drama',
+    watchTime: '0 hours',
+    completedMovies: 0
+  };
 
   return (
-    <div className="max-w-2xl mx-auto bg-gray-800 rounded-lg p-8 shadow-lg">
-      <h2 className="text-2xl font-bold text-white text-center mb-6">Profile</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 transition-colors"
-            required
-          />
+    <div className="min-h-screen bg-black pt-20">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Profile</h1>
+            <p className="text-gray-400">
+              Manage your account settings and preferences
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Profile Card */}
+            <div className="lg:col-span-1">
+              <div className="bg-gray-900 rounded-lg p-6">
+                <div className="text-center mb-6">
+                  <div className="w-24 h-24 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-white text-3xl font-bold">
+                      {profile.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <h2 className="text-xl font-bold text-white">{profile.name}</h2>
+                  <p className="text-gray-400">{profile.email}</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="text-center pt-4 border-t border-gray-800">
+                    <div className="text-2xl font-bold text-red-500">{watchingStats.totalWatched}</div>
+                    <div className="text-gray-400 text-sm">Movies Watched</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-500">{watchingStats.completedMovies}</div>
+                    <div className="text-gray-400 text-sm">Completed</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-500">{watchingStats.watchTime}</div>
+                    <div className="text-gray-400 text-sm">Watch Time</div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                >
+                  {isEditing ? 'Cancel' : 'Edit Profile'}
+                </button>
+              </div>
+            </div>
+
+            {/* Profile Details */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              {/* Personal Information */}
+              <div className="bg-gray-900 rounded-lg p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Personal Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-400 text-sm font-medium mb-2">
+                      Full Name
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={profile.name}
+                        onChange={(e) => setProfile({...profile, name: e.target.value})}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
+                      />
+                    ) : (
+                      <p className="text-white">{profile.name}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-gray-400 text-sm font-medium mb-2">
+                      Email Address
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        value={profile.email}
+                        onChange={(e) => setProfile({...profile, email: e.target.value})}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
+                      />
+                    ) : (
+                      <p className="text-white">{profile.email}</p>
+                    )}
+                  </div>
+                </div>
+                
+                {isEditing && (
+                  <div className="mt-4 flex space-x-3">
+                    <button
+                      onClick={handleSave}
+                      className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Viewing Preferences */}
+              <div className="bg-gray-900 rounded-lg p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Viewing Preferences</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-white font-medium">Autoplay Next Episode</label>
+                      <p className="text-gray-400 text-sm">Automatically play the next episode</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={profile.preferences.autoplay}
+                        onChange={(e) => setProfile({
+                          ...profile,
+                          preferences: {...profile.preferences, autoplay: e.target.checked}
+                        })}
+                        className="sr-only peer"
+                        disabled={!isEditing}
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-white font-medium">Email Notifications</label>
+                      <p className="text-gray-400 text-sm">Receive updates about new releases</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={profile.preferences.notifications}
+                        onChange={(e) => setProfile({
+                          ...profile,
+                          preferences: {...profile.preferences, notifications: e.target.checked}
+                        })}
+                        className="sr-only peer"
+                        disabled={!isEditing}
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="block text-white font-medium mb-2">Preferred Video Quality</label>
+                    {isEditing ? (
+                      <select
+                        value={profile.preferences.quality}
+                        onChange={(e) => setProfile({
+                          ...profile,
+                          preferences: {...profile.preferences, quality: e.target.value}
+                        })}
+                        className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
+                      >
+                        <option value="Auto">Auto</option>
+                        <option value="4K">4K Ultra HD</option>
+                        <option value="1080p">1080p HD</option>
+                        <option value="720p">720p HD</option>
+                      </select>
+                    ) : (
+                      <p className="text-white">{profile.preferences.quality}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-white font-medium mb-2">Language</label>
+                    {isEditing ? (
+                      <select
+                        value={profile.preferences.language}
+                        onChange={(e) => setProfile({
+                          ...profile,
+                          preferences: {...profile.preferences, language: e.target.value}
+                        })}
+                        className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
+                      >
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="German">German</option>
+                      </select>
+                    ) : (
+                      <p className="text-white">{profile.preferences.language}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Security */}
+              <div className="bg-gray-900 rounded-lg p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Account Security</h3>
+                <div className="space-y-4">
+                  <button className="w-full text-left bg-gray-800 hover:bg-gray-700 rounded-lg p-4 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-white font-medium">Change Password</h4>
+                        <p className="text-gray-400 text-sm">Update your password</p>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </button>
+
+                  <button className="w-full text-left bg-gray-800 hover:bg-gray-700 rounded-lg p-4 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-white font-medium">Two-Factor Authentication</h4>
+                        <p className="text-gray-400 text-sm">Add an extra layer of security</p>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </button>
+
+                  <button className="w-full text-left bg-gray-800 hover:bg-gray-700 rounded-lg p-4 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-white font-medium">Downloaded Content</h4>
+                        <p className="text-gray-400 text-sm">Manage offline downloads</p>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Subscription */}
+              <div className="bg-gray-900 rounded-lg p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Subscription</h3>
+                <div className="bg-red-600 rounded-lg p-4 mb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-white font-bold text-lg">Premium Plan</h4>
+                      <p className="text-red-100">Unlimited movies and TV shows</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-white font-bold text-lg">$15.99</div>
+                      <div className="text-red-100 text-sm">per month</div>
+                    </div>
+                  </div>
+                </div>
+                <button className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+                  Manage Subscription
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 transition-colors"
-            required
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
-            New Password (optional)
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 transition-colors"
-            placeholder="Leave blank to keep current password"
-            minLength={8}
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
-            Confirm New Password
-          </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 transition-colors"
-            placeholder="Confirm new password"
-          />
-        </div>
-        
-        <div className="bg-gray-700 rounded-md p-4">
-          <h3 className="text-lg font-semibold text-white mb-2">Account Information</h3>
-          <p className="text-gray-300"><strong>Role:</strong> {user.role}</p>
-          <p className="text-gray-300"><strong>Member since:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
-        </div>
-        
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium transition-colors ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-        >
-          {loading ? 'Updating...' : 'Update Profile'}
-        </button>
-      </form>
+      </div>
     </div>
   );
 };

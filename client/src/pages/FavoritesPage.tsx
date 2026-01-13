@@ -1,141 +1,169 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { HeartIcon, StarIcon } from '@heroicons/react/24/solid';
-import { toast } from 'react-toastify';
-
-interface FavoriteMovie {
-  _id: string;
-  movie: {
-    _id: string;
-    title: string;
-    posterUrl: string;
-    year: number;
-    rating: number;
-  };
-}
+import MovieCard from '../components/MovieCard';
+import { Movie } from '../data/movies';
 
 const FavoritesPage = () => {
-  const { user } = useAuth();
-  const [favorites, setFavorites] = useState<FavoriteMovie[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Movie[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFavorites = async () => {
+    // Simulate loading favorites from API/localStorage
+    const loadFavorites = async () => {
+      setIsLoading(true);
       try {
-        setLoading(true);
-        const response = await api.get('/favorites');
-        setFavorites(response.data.data);
-      } catch (err) {
-        console.error('Error fetching favorites:', err);
-        setError('Failed to load favorites');
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Mock favorite movies (in a real app, this would come from user data)
+        const favoriteMovies: Movie[] = [
+          // These would typically be loaded from user preferences/API
+        ];
+        
+        setFavorites(favoriteMovies);
+      } catch (error) {
+        console.error('Error loading favorites:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    
-    if (user) {
-      fetchFavorites();
-    }
-  }, [user]);
 
-  const handleRemoveFavorite = async (favoriteId: string) => {
-    try {
-      await api.delete(`/favorites/${favoriteId}`);
-      setFavorites(favorites.filter(f => f._id !== favoriteId));
-      toast.success('Removed from favorites');
-    } catch (err) {
-      console.error('Error removing favorite:', err);
-      toast.error('Failed to remove from favorites');
-    }
+    loadFavorites();
+  }, []);
+
+  const removeFromFavorites = (movieId: string) => {
+    setFavorites(prev => prev.filter(movie => movie.id !== movieId));
   };
 
-  if (!user) {
+  if (isLoading) {
     return (
-      <div className="text-center py-8">
-        <p className="text-red-500">Please login to view your favorites</p>
-        <Link to="/login" className="text-blue-400 hover:text-blue-300 mt-4 inline-block">
-          Login
-        </Link>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-500 mb-4">{error}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
-        >
-          Retry
-        </button>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loading-spinner"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">My Favorites</h2>
-      
-      {favorites.length === 0 ? (
-        <div className="text-center py-8">
-          <HeartIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400">You haven't added any movies to favorites yet</p>
-          <Link to="" className="text-blue-400 hover:text-blue-300 mt-4 inline-block">
-            Browse movies
-          </Link>
+    <div className="min-h-screen bg-black pt-20">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center space-x-3">
+            <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
+            </svg>
+            <span>My Favorites</span>
+          </h1>
+          <p className="text-gray-400">
+            Your favorite movies collection
+          </p>
         </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {favorites.map((favorite) => (
-            <div key={favorite._id} className="bg-gray-800 rounded-lg overflow-hidden relative">
-              <button
-                onClick={() => handleRemoveFavorite(favorite._id)}
-                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 z-10"
-                title="Remove from favorites"
-              >
-                <HeartIcon className="h-5 w-5" fill="currentColor" />
-              </button>
-              
-              <Link to={`/movie/${favorite.movie._id}`} className="block">
-                <img
-                  src={favorite.movie.posterUrl}
-                  alt={favorite.movie.title}
-                  className="w-full h-48 object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/default-movie.jpg';
-                  }}
-                />
-              </Link>
-              
-              <div className="p-3">
-                <h3 className="font-semibold text-white truncate mb-1">{favorite.movie.title}</h3>
-                
-                <div className="flex items-center justify-between text-sm text-gray-400">
-                  <span>{favorite.movie.year}</span>
-                  <div className="flex items-center">
-                    <StarIcon className="h-4 w-4 text-yellow-400" />
-                    <span className="ml-1">{favorite.movie.rating.toFixed(1)}</span>
+
+        {favorites.length > 0 ? (
+          <div>
+            {/* Stats */}
+            <div className="bg-gray-900 rounded-lg p-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-red-500">{favorites.length}</div>
+                  <div className="text-gray-400">Favorite Movies</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-yellow-500">
+                    {Math.round(favorites.reduce((sum, movie) => sum + movie.imdbRating, 0) / favorites.length * 10) / 10}
                   </div>
+                  <div className="text-gray-400">Average Rating</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-500">
+                    {new Set(favorites.flatMap(movie => movie.genres)).size}
+                  </div>
+                  <div className="text-gray-400">Genres</div>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+
+            {/* Movies Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8">
+              {favorites.map((movie) => (
+                <div key={movie.id} className="relative group">
+                  <MovieCard movie={movie} size="medium" />
+                  <button
+                    onClick={() => removeFromFavorites(movie.id)}
+                    className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    title="Remove from favorites"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Genres Summary */}
+            <div className="bg-gray-900 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-white mb-4">Your Favorite Genres</h3>
+              <div className="flex flex-wrap gap-2">
+                {Array.from(new Set(favorites.flatMap(movie => movie.genres)))
+                  .sort((a, b) => {
+                    const countA = favorites.filter(movie => movie.genres.includes(a)).length;
+                    const countB = favorites.filter(movie => movie.genres.includes(b)).length;
+                    return countB - countA;
+                  })
+                  .map((genre) => {
+                    const count = favorites.filter(movie => movie.genres.includes(genre)).length;
+                    return (
+                      <Link
+                        key={genre}
+                        to={`/category/${genre.toLowerCase()}`}
+                        className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white px-4 py-2 rounded-full transition-colors flex items-center space-x-2"
+                      >
+                        <span>{genre}</span>
+                        <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full">
+                          {count}
+                        </span>
+                      </Link>
+                    );
+                  })}
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Empty State */
+          <div className="text-center py-16">
+            <svg className="w-24 h-24 text-gray-600 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <h2 className="text-2xl font-bold text-white mb-4">No favorites yet</h2>
+            <p className="text-gray-400 mb-8 max-w-md mx-auto">
+              Start building your collection by adding movies to your favorites. Click the heart icon on any movie to add it here.
+            </p>
+            <div className="space-y-4">
+              <Link
+                to="/"
+                className="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors"
+              >
+                Discover Movies
+              </Link>
+              <div className="text-gray-500 text-sm">
+                or browse by genre
+              </div>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {['Action', 'Comedy', 'Drama', 'Sci-Fi', 'Thriller'].map((genre) => (
+                  <Link
+                    key={genre}
+                    to={`/category/${genre.toLowerCase()}`}
+                    className="genre-tag"
+                  >
+                    {genre}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

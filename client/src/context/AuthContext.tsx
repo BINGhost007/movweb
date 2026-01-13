@@ -1,14 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import api from '../services/api';
 
 interface User {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   role: 'user' | 'admin';
-  token: string;
+  avatar?: string;
 }
 
 interface AuthContextType {
@@ -25,21 +22,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   // Check if user is logged in on initial load
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const response = await api.get('/auth/me', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setUser(response.data);
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
         }
       } catch (error) {
         console.error('Auth check failed:', error);
+        localStorage.removeItem('user');
         localStorage.removeItem('token');
       } finally {
         setLoading(false);
@@ -51,54 +45,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      const { token, ...userData } = response.data;
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      localStorage.setItem('token', token);
-      setUser(userData);
-      
-      toast.success('Login successful!');
-      navigate('/');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      // Mock authentication - in real app, this would call the API
+      if (email === 'user@example.com' && password === 'password') {
+        const userData: User = {
+          id: '1',
+          name: 'John Doe',
+          email: email,
+          role: 'user'
+        };
+        
+        localStorage.setItem('token', 'mock-jwt-token');
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+      } else if (email === 'admin@example.com' && password === 'admin123') {
+        const userData: User = {
+          id: '2',
+          name: 'Admin User',
+          email: email,
+          role: 'admin'
+        };
+        
+        localStorage.setItem('token', 'mock-admin-jwt-token');
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+      } else {
+        throw new Error('Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
       throw error;
     }
   };
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      const response = await api.post('/auth/register', { name, email, password });
-      const { token, ...userData } = response.data;
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      localStorage.setItem('token', token);
+      // Mock registration - in real app, this would call the API
+      const userData: User = {
+        id: Date.now().toString(),
+        name,
+        email,
+        role: 'user'
+      };
+      
+      localStorage.setItem('token', 'mock-jwt-token');
+      localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
-      
-      toast.success('Registration successful!');
-      navigate('/');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+    } catch (error) {
+      console.error('Registration failed:', error);
       throw error;
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
-    toast.success('Logged out successfully');
-    navigate('/login');
   };
 
   const updateProfile = async (name: string, email: string, password?: string) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await api.put('/auth/profile', { name, email, password }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      setUser(prev => prev ? { ...prev, name, email } : null);
-      toast.success('Profile updated successfully');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Profile update failed');
+      if (user) {
+        const updatedUser = { ...user, name, email };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Profile update failed:', error);
       throw error;
     }
   };
