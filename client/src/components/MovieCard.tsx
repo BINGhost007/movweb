@@ -1,57 +1,63 @@
-import { Link } from 'react-router-dom';
-import { StarIcon, PlayIcon } from '@heroicons/react/24/solid';
-
 interface MovieCardProps {
   movie: {
-    _id: string;
+    id: string;
     title: string;
-    posterUrl: string;
     year: number;
     rating: number;
+    genre: string;
     quality: string;
   };
 }
 
+const POSTER_GRADIENTS = [
+  'from-indigo-500 to-violet-500',
+  'from-emerald-500 to-teal-500',
+  'from-rose-500 to-orange-500',
+  'from-sky-500 to-blue-600',
+  'from-fuchsia-500 to-purple-600',
+  'from-amber-500 to-yellow-500',
+  'from-cyan-500 to-sky-500',
+  'from-lime-500 to-emerald-500',
+];
+
 const MovieCard = ({ movie }: MovieCardProps) => {
+  const index = (Number.parseInt(movie.id, 10) || 0) % POSTER_GRADIENTS.length;
+  const gradient = POSTER_GRADIENTS[index];
+
+  const initials = movie.title
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join('');
+
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden hover:transform hover:scale-105 transition-transform duration-300 group">
-      <div className="relative">
-        <img
-          src={movie.posterUrl}
-          alt={movie.title}
-          className="w-full h-48 object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = '/default-movie.jpg';
-          }}
-        />
-        
-        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <Link
-            to={`/movie/${movie._id}`}
-            className="bg-white bg-opacity-90 hover:bg-opacity-100 text-black rounded-full p-3 transition-all duration-200"
-          >
-            <PlayIcon className="h-6 w-6" />
-          </Link>
-        </div>
-        
-        <div className="absolute top-2 left-2 bg-yellow-600 text-white px-2 py-1 rounded text-xs font-bold">
-          {movie.quality}
+    <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+      <div className={`aspect-[2/3] w-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+        <span className="text-white/90 text-4xl font-extrabold tracking-tight">{initials}</span>
+      </div>
+
+      <div className="p-4">
+        <h3 className="text-lg font-semibold leading-snug text-slate-900 line-clamp-2 group-hover:text-slate-950">
+          {movie.title}
+        </h3>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+            {movie.year}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-800">
+            {movie.genre}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800">
+            {movie.quality}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800">
+            ★ {movie.rating.toFixed(1)}
+          </span>
         </div>
       </div>
-      
-      <div className="p-3">
-        <h3 className="font-semibold text-white truncate mb-1">{movie.title}</h3>
-        
-        <div className="flex items-center justify-between text-sm text-gray-400">
-          <span>{movie.year}</span>
-          <div className="flex items-center">
-            <StarIcon className="h-4 w-4 text-yellow-400" />
-            <span className="ml-1">{movie.rating.toFixed(1)}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    </article>
   );
 };
 

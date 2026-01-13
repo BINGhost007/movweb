@@ -1,72 +1,71 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import MovieDetailPage from './pages/MovieDetailPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ProfilePage from './pages/ProfilePage';
-import FavoritesPage from './pages/FavoritesPage';
-import WatchlistPage from './pages/WatchlistPage';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminMovies from './pages/admin/AdminMovies';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminCategories from './pages/admin/AdminCategories';
-import AdminStats from './pages/admin/AdminStats';
-import PrivateRoute from './components/PrivateRoute';
-import AdminRoute from './components/AdminRoute';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 
-function App() {
+const App = () => {
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-        <Navbar />
-        
-        <main className="flex-grow container mx-auto px-4 py-8">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/movie/:id" element={<MovieDetailPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            
-            {/* Private Routes */}
-            <Route element={<PrivateRoute />}>
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/favorites" element={<FavoritesPage />} />
-              <Route path="/watchlist" element={<WatchlistPage />} />
-            </Route>
-            
-            {/* Admin Routes */}
-            <Route element={<AdminRoute />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/movies" element={<AdminMovies />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/categories" element={<AdminCategories />} />
-              <Route path="/admin/stats" element={<AdminStats />} />
-            </Route>
-          </Routes>
+    <BrowserRouter>
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+        <header className="bg-white border-b border-slate-200">
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="h-16 flex items-center justify-between">
+              <NavLink to="/" className="text-lg font-extrabold tracking-tight">
+                MovieStream
+              </NavLink>
+
+              <nav className="flex items-center gap-1 sm:gap-2 text-sm font-medium text-slate-700">
+                <NavLink
+                  to="/"
+                  className={({ isActive }) =>
+                    [
+                      'px-3 py-2 rounded-md hover:bg-slate-100 hover:text-slate-900 transition-colors',
+                      isActive ? 'bg-slate-100 text-slate-900' : '',
+                    ].join(' ')
+                  }
+                >
+                  Home
+                </NavLink>
+                <a
+                  href="#popular"
+                  className="px-3 py-2 rounded-md hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                >
+                  Popular
+                </a>
+                <a
+                  href="#genres"
+                  className="hidden sm:inline-flex px-3 py-2 rounded-md hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                >
+                  Genres
+                </a>
+              </nav>
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1">
+          <div className="mx-auto max-w-6xl px-4 py-8">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route
+                path="*"
+                element={
+                  <div className="rounded-lg border border-slate-200 bg-white p-8">
+                    <h1 className="text-2xl font-bold">Page not found</h1>
+                    <p className="mt-2 text-slate-600">Try going back to the homepage.</p>
+                  </div>
+                }
+              />
+            </Routes>
+          </div>
         </main>
-        
-        <Footer />
-        
-        <ToastContainer 
-          position="bottom-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
+
+        <footer className="bg-white border-t border-slate-200">
+          <div className="mx-auto max-w-6xl px-4 py-6">
+            <p className="text-sm text-slate-600">© {new Date().getFullYear()} MovieStream</p>
+          </div>
+        </footer>
       </div>
-    </Router>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
