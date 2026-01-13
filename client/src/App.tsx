@@ -21,7 +21,7 @@ import Footer from './components/Footer';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen flex flex-col bg-gray-900 text-white">
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
         <Navbar />
         
         <main className="flex-grow container mx-auto px-4 py-8">
@@ -62,7 +62,7 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="dark"
+          theme="light"
         />
       </div>
     </Router>
